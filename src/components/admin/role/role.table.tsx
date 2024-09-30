@@ -21,7 +21,7 @@ const RoleTable = (props: IProps) => {
     const { Search } = Input;
     const [searchParam, setSearchParam] = useState(null)
     const [roles, setRoles] = useState(props.roles);
-    const [roleDetail, setRoleDetail] = useState();
+    const [roleDetail, setRoleDetail] = useState<any>();
     const [meta, setMeta] = useState({
         currentPage: props.meta.currentPage,
         itemsPerPage: props.meta.itemsPerPage,
@@ -163,7 +163,7 @@ const RoleTable = (props: IProps) => {
     const handleEdit = async (role: any) => {
         console.log('Role being edited:', role);
         const response = await getRole(role.id);
-        console.log("response->", response)
+
         setRoleDetail(response);
         showModalEdit()
     };

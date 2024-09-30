@@ -43,6 +43,7 @@ const EditRole = (role: any) => {
             form.setFieldsValue({
                 name: role.role.name,
                 code: role.role.code,
+                permission: role.role.permissions.map((per: { id: any; }) => per.id)
             });
         }
     }, [role]);
@@ -94,13 +95,12 @@ const EditRole = (role: any) => {
             <Form.Item
                 label="Permission"
                 rules={[{ required: true, message: 'Please select at least one permission!' }]}
-                name='permission_'
+                name='permission'
             >
                 <Select
                     mode="multiple"
                     placeholder="Please select permission"
                     onChange={handleChange}
-                    value={role.role.permissions.map((perm: { id: any; }) => perm.id)}
                 >
                     {permission.map((value) => (
                         <Option key={value.id} value={value.id}>

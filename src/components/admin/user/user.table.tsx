@@ -1,10 +1,16 @@
 'use client'
 import { User } from "@/types/user.type";
 import Access_token from "@/utils/session";
-import { Button, Modal, Pagination, Table } from "antd"
+import { Button, Image, Modal, Pagination, Table, TableColumnsType } from "antd"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Input } from 'antd';
+import { CheckCircleOutlined, DeleteOutlined, EditOutlined, StopOutlined } from "@ant-design/icons";
+import { activeUser } from "@/app/api/role";
+import CreateUser from "./user.create";
+import { CldImage } from "next-cloudinary";
+import { userDetail } from "@/app/api/user";
+import EditUser from "./user.edit";
 
 
 
@@ -14,6 +20,7 @@ interface IProps {
 }
 export default function UserTable(props: IProps) {
     const { Search } = Input;
+    const [user, setUser] = useState();
     const [searchParam, setSearchParam] = useState(null)
     const [users, setUsers] = useState(props.users);
     const [meta, setMeta] = useState({
@@ -24,23 +31,39 @@ export default function UserTable(props: IProps) {
     const [loading, setLoading] = useState(false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+
     const showModal = () => {
         setIsModalOpen(true);
     };
-
-    const handleOk = () => {
-        setIsModalOpen(false);
-    };
-
     const handleCancel = () => {
         setIsModalOpen(false);
     };
+    const showModalEdit = () => {
+        setIsModalOpenEdit(true);
+    };
+    const handleCancelEdit = () => {
+        setIsModalOpenEdit(false);
+    };
 
-    const columns = [
+    const columns: TableColumnsType<any> = [
         {
             title: 'ID',
             dataIndex: 'id',
             key: 'id',
+        },
+        {
+            title: 'avatar',
+            dataIndex: 'avatar',
+            key: 'avatar',
+            render: (text, record) =>
+                <div>
+                    <img
+                        style={{ width: '50px', height: '50px' }}
+                        src={record.avatar}
+                        alt="avatar"
+                    />
+                </div>,
         },
         {
             title: 'code',
@@ -76,8 +99,46 @@ export default function UserTable(props: IProps) {
             title: 'status',
             dataIndex: 'status',
             key: 'status',
+            render: (text, record) =>
+                <div>
+                    {record.status == 1 ? (
+                        <CheckCircleOutlined
+                            style={{ color: 'green', padding: '10px', fontSize: '16px' }}
+                            onClick={() => handleActive(record)}
+                        />
+                    ) : (
+                        <StopOutlined
+                            style={{ color: 'red', padding: '10px', fontSize: '16px' }}
+                            onClick={() => handleActive(record)}
+                        />
+                    )}
+                </div>,
+        },
+        {
+            title: 'Action',
+            dataIndex: '',
+            key: 'x',
+            render: (text, record) =>
+                <div>
+                    <EditOutlined
+                        style={{ color: 'blue', padding: '10px', fontSize: "16px" }}
+                        onClick={() => handleEdit(record)}
+                    />
+                </div>,
         },
     ];
+    const handleActive = async (record: any) => {
+        console.log("record->", record);
+        // const response = await test(record.id);
+        // console.log("response->", response)
+    }
+    const handleEdit = async (user: any) => {
+        console.log('Role being edited:', user.avatar);
+        // const response = await userDetail(user.id)
+        setUser(user);
+        // setRoleDetail(response);
+        showModalEdit()
+    };
     const fetchUsers = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
         setLoading(true);
         const session = await Access_token();
@@ -146,6 +207,7 @@ export default function UserTable(props: IProps) {
                 loading={loading}
                 bordered
                 dataSource={users}
+                key={users.id}
                 columns={columns}
                 pagination={{
                     current: meta.currentPage,
@@ -157,10 +219,11 @@ export default function UserTable(props: IProps) {
                 onChange={handleTableChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
             />
-            <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <p>Some contents...</p>
-                <p>Some contents...</p>
-                <p>Some contents...</p>
+            <Modal title="Create Modal" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <CreateUser></CreateUser>
+            </Modal>
+            <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
+                <EditUser user={user}></EditUser>
             </Modal>
         </>
     )

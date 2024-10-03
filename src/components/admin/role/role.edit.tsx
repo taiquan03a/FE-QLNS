@@ -1,5 +1,5 @@
 import { getPermissions } from '@/app/api/permission';
-import { createRole } from '@/app/api/role';
+import { createRole, editRole } from '@/app/api/role';
 import {
     Form,
     Select,
@@ -50,25 +50,28 @@ const EditRole = (role: any) => {
     const handleSubmit = async (values: any) => {
         try {
             const { name, code } = values;
-            const role: Role = {
+            const newRole: Role = {
                 name: name,
                 code: code,
-                permissionId: permission.map(permission => permission.id)
+                permissionId: selectedValues
             };
-
-            const response = await createRole(role)
+            console.log("id->", role.role.id);
+            const response = await editRole(role.role.id, newRole)
             console.log("values->", response)
-            if (response.statusCode === 201) {
-                message.success('Role created successfully!');
+            if (response.statusCode === 200) {
+                message.success('Role update successfully!');
                 form.resetFields();
             }
             if (response.statusCode == 400) {
                 message.error('Code unique!.')
             }
-
+            if (response.statusCode == 404) {
+                message.error('Role not found!.')
+            }
+            window.location.reload();
         } catch (error) {
-            console.error('Failed to create role:', error);
-            message.error('Failed to create role.');
+            console.error('Failed to edit role:', error);
+            message.error('Failed to edit role.');
         }
     };
     return (

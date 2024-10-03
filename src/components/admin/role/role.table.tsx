@@ -2,7 +2,7 @@
 import { auth } from "@/auth";
 import { getRoles } from "@/utils/action";
 import Access_token from "@/utils/session";
-import { Button, Modal, Table, TableColumnsType } from "antd"
+import { Button, message, Modal, Table, TableColumnsType } from "antd"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import dayjs from 'dayjs';
@@ -10,7 +10,7 @@ import { Input } from 'antd';
 import CreateRole from "./role.create";
 import { CheckOutlined, DeleteOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
 import EditRole from "./role.edit";
-import { getRole } from "@/app/api/role";
+import { deleteRole, getRole } from "@/app/api/role";
 
 interface IProps {
     roles: any,
@@ -35,14 +35,14 @@ const RoleTable = (props: IProps) => {
         setIsModalOpen(true);
     };
     const handleCancel = (pagination: any) => {
-        fetchRoles(pagination.current, pagination.pageSize, null);
+        // fetchRoles(pagination.current, pagination.pageSize, null);
         setIsModalOpen(false);
     };
     const showModalEdit = () => {
         setIsModalOpenEdit(true);
     };
     const handleCancelEdit = (pagination: any) => {
-        fetchRoles(pagination.current, pagination.pageSize, null);
+        // fetchRoles(pagination.current, pagination.pageSize, null);
         setIsModalOpenEdit(false);
     };
     const columns: TableColumnsType<any> = [
@@ -110,10 +110,6 @@ const RoleTable = (props: IProps) => {
                         style={{ color: "red", padding: '10px', fontSize: "16px" }}
                         onClick={() => handleActive(record)}
                     />
-                    <MoreOutlined
-                        style={{ color: "black", padding: '10px', fontSize: "16px" }}
-                        onClick={() => handleActive(record)}
-                    />
                 </div>,
         },
     ];
@@ -167,9 +163,18 @@ const RoleTable = (props: IProps) => {
         setRoleDetail(response);
         showModalEdit()
     };
-    const handleActive = (role: any) => {
+    const handleActive = async (role: any) => {
         console.log('Role being active:', role);
-        // Thực hiện logic chỉnh sửa với role
+        try {
+            const response = await deleteRole(role.id);
+            if (response.statusCode === 200) {
+                message.success('Role edit successfully!');
+                window.location.reload();
+            }
+        } catch (e) {
+            console.error('Failed to delete role:', e);
+            message.error('Failed to delete role.');
+        }
     };
 
     return (

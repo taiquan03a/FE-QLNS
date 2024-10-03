@@ -8,6 +8,7 @@ import {
     Input,
     message,
 } from 'antd';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface Permission {
@@ -16,6 +17,7 @@ interface Permission {
     name: string;
 }
 const CreateRole = () => {
+    const router = useRouter();
     const [form] = Form.useForm();
     const [selectedValues, setSelectedValues] = useState<string[]>([]);
     const [permission, setPermission] = useState<Permission[]>([]);
@@ -42,7 +44,7 @@ const CreateRole = () => {
             const role: Role = {
                 name: name,
                 code: code,
-                permissionId: permission.map(permission => permission.id)
+                permissionId: selectedValues
             };
 
             const response = await createRole(role)
@@ -50,6 +52,7 @@ const CreateRole = () => {
             if (response.statusCode === 201) {
                 message.success('Role created successfully!');
                 form.resetFields();
+                router.refresh();
             }
             if (response.statusCode == 400) {
                 message.error('Code unique!.')

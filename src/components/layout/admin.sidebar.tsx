@@ -5,6 +5,8 @@ import {
     AppstoreOutlined,
     MailOutlined,
     SettingOutlined,
+    SmileOutlined,
+    SolutionOutlined,
     TeamOutlined,
 
 } from '@ant-design/icons';
@@ -41,44 +43,44 @@ const AdminSideBar = () => {
                     icon: <TeamOutlined />,
                 },
                 {
-                    key: 'sub1',
-                    label: 'Navigation One',
-                    icon: <MailOutlined />,
-                    children: [
-                        {
-                            key: 'g1',
-                            label: 'Item 1',
-                            type: 'group',
-                            children: [
-                                { key: '1', label: 'Option 1' },
-                                { key: '2', label: 'Option 2' },
-                            ],
-                        },
-                        {
-                            key: 'g2',
-                            label: 'Item 2',
-                            type: 'group',
-                            children: [
-                                { key: '3', label: 'Option 3' },
-                                { key: '4', label: 'Option 4' },
-                            ],
-                        },
-                    ],
-                },
-                {
                     key: 'sub2',
-                    label: 'Navigation Two',
+                    label: 'Manage Category',
                     icon: <AppstoreOutlined />,
                     children: [
-                        { key: '5', label: 'Option 5' },
-                        { key: '6', label: 'Option 6' },
                         {
-                            key: 'sub3',
-                            label: 'Submenu',
-                            children: [
-                                { key: '7', label: 'Option 7' },
-                                { key: '8', label: 'Option 8' },
-                            ],
+                            key: 'degree',
+                            label: <Link href={"/dashboard/category/degree"}>Manage Degree</Link>,
+                            icon: <SmileOutlined />
+                        },
+                        {
+                            key: 'ethnicity',
+                            label: <Link href={"/dashboard/category/ethnicity"}>Manage Ethnicity</Link>,
+                            icon: <SolutionOutlined />
+                        },
+                        {
+                            key: 'major',
+                            label: <Link href={"/dashboard/category/major"}>Manage Major</Link>,
+                            icon: <SolutionOutlined />
+                        },
+                        {
+                            key: 'school',
+                            label: <Link href={"/dashboard/category/school"}>Manage School</Link>,
+                            icon: <SolutionOutlined />
+                        },
+                        {
+                            key: 'education',
+                            label: <Link href={"/dashboard/category/educationType"}>Manage Education Type</Link>,
+                            icon: <SolutionOutlined />
+                        },
+                        {
+                            key: 'relationship',
+                            label: <Link href={"/dashboard/category/relationship"}>Manage Relationship</Link>,
+                            icon: <SolutionOutlined />
+                        },
+                        {
+                            key: 'province',
+                            label: <Link href={"/dashboard/category/province"}>Manage Province</Link>,
+                            icon: <SolutionOutlined />
                         },
                     ],
                 },

@@ -1,5 +1,5 @@
 'use client'
-import { Button, message, Modal, Table, TableColumnsType } from "antd"
+import { Button, message, Modal, Select, SelectProps, Table, TableColumnsType } from "antd"
 import { useEffect, useState } from "react";
 import dayjs from 'dayjs';
 import { Input } from 'antd';
@@ -7,29 +7,33 @@ import { DeleteOutlined, EditOutlined, InfoCircleOutlined } from "@ant-design/ic
 import { deleteCategory, getCategoryList } from "@/app/api/category";
 import CreateCategory from "../category/category.create";
 import EditCategory from "../category/category.edit";
-import { getDistrictsByProvince } from "@/app/api/address";
-import Link from "next/link";
+import { getDistrictsByProvince, getWardsByDistrict } from "@/app/api/address";
+import CreateAddress from "./address.create";
+import EditAddress from "./address.edit";
 import { useRouter } from "next/navigation";
 
 interface IProps {
-    categoryName: string,
-    category: any,
-    meta: any
+    province: any,
 }
 
 
-const ProvinceTable = (props: IProps) => {
+const WardTable = (props: IProps) => {
     const router = useRouter();
+    const [optionsProvince, setOptionsProvince] = useState<SelectProps['options']>([]);
+    const [optionsDistrict, setOptionsDistrict] = useState<SelectProps['options']>([]);
+    const [selectProvinceId, setSelectProvinceId] = useState<number>();
+    const [selectDistrictId, setSelectDistrictId] = useState<number>();
     const { Search } = Input;
     const [searchParam, setSearchParam] = useState(null)
-    const [category, setCategory] = useState(props.category);
+    const [province, setProvince] = useState(props.province);
+    const [district, setDistrict] = useState<any>();
     const [categoryDetail, setCategoryDetail] = useState<any>();
+    const [categoryName, setCategoryName] = useState('ward');
     const [meta, setMeta] = useState({
-        currentPage: props.meta.currentPage,
-        itemsPerPage: props.meta.itemsPerPage,
-        totalItems: props.meta.totalItems,
+        currentPage: 1,
+        itemsPerPage: 5,
+        totalItems: 10,
     });
-    const [categoryName, setCategoryName] = useState(props.categoryName);
     const [loading, setLoading] = useState(false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -117,11 +121,12 @@ const ProvinceTable = (props: IProps) => {
     ];
 
 
-    const fetchCategory = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
+    const fetchDistrict = async (provinceId: number, currentPage: any, itemsPerPage: any, searchParam: any) => {
         setLoading(true);
         try {
-            const response = await getCategoryList(categoryName, currentPage, itemsPerPage, searchParam);
-            setCategory(response.data);
+            const response = await getWardsByDistrict(provinceId, currentPage, itemsPerPage, searchParam);
+            console.log('response->', response.data);
+            setDistrict(response.data);
             setMeta({
                 currentPage: response.meta.currentPage,
                 itemsPerPage: response.meta.itemsPerPage,
@@ -132,11 +137,24 @@ const ProvinceTable = (props: IProps) => {
         }
         setLoading(false)
     };
+    const fetchOptionsProvince = async () => {
+        try {
+            const response = await getCategoryList('province', 1, 100, null);
+            const fetchedOptions = response.data.map((item: any) => ({
+                value: item.id,
+                label: item.name,
+            }));
+            setOptionsProvince(fetchedOptions);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
     useEffect(() => {
-        fetchCategory(meta.currentPage, meta.itemsPerPage, searchParam);
+        fetchOptionsProvince();
+        fetchDistrict(province.id, meta.currentPage, meta.itemsPerPage, searchParam);
     }, []);
     const handleTableChange = (pagination: any) => {
-        fetchCategory(pagination.current, pagination.pageSize, null);
+        fetchDistrict(province.id, pagination.current, pagination.pageSize, null);
     };
     const handleEdit = async (category: any) => {
         console.log('Role being edited:', category);
@@ -144,18 +162,68 @@ const ProvinceTable = (props: IProps) => {
         showModalEdit()
     };
     const handleDetail = async (category: any) => {
-        router.push(`province/${category.id}`)
+        // try {
+        //     const response = await getDistrictsByProvince(category.id,);
+        //     if (response.statusCode === 200) {
+        //         message.success('detail successfully!');
+        //         //fetchCategory(1, 5, null);
+        //     }
+        // } catch (e) {
+        //     console.error('Failed');
+        //     message.error('Failed');
+        // }
     };
 
+    const handleChangeProvince = async (value: number) => {
+        setSelectProvinceId(value);
+        const district = await getDistrictsByProvince(value, 1, 100, null);
+        const fetchedOptions = district.data.map((item: any) => ({
+            value: item.id,
+            label: item.name,
+        }));
+        setOptionsDistrict(fetchedOptions);
+        console.log('vlues province->', value);
+    };
+    const handleChangeDistrict = (value: number) => {
+        router.push(`/dashboard/category/province/${selectProvinceId}/${value}`)
+    }
     return (
         <>
             <div style={{
                 display: "flex", justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 20
+                marginBottom: 20,
+                marginTop: 20,
             }}>
-                <span>Manager {categoryName}</span>
-                <Button onClick={showModal}>Create {categoryName}</Button>
+                <div style={{ width: '50%' }}>
+                    <Select
+                        showSearch
+                        style={{ width: '50%' }}
+                        placeholder="Select Province"
+                        onChange={handleChangeProvince}
+                        options={optionsProvince}
+                        filterOption={(inputValue, option) => {
+                            if (!option) return false;
+                            const label = option.label?.toString().toLowerCase() || '';
+                            return label.includes(inputValue.toLowerCase());
+                        }
+                        }
+                    />
+                    <Select
+                        showSearch
+                        style={{ width: '50%' }}
+                        placeholder="Select District"
+                        onChange={handleChangeDistrict}
+                        options={optionsDistrict}
+                        filterOption={(inputValue, option) => {
+                            if (!option) return false;
+                            const label = option.label?.toString().toLowerCase() || '';
+                            return label.includes(inputValue.toLowerCase());
+                        }
+                        }
+                    />
+                </div>
+                <Button onClick={showModal}>Create </Button>
             </div>
 
             <Search
@@ -168,7 +236,7 @@ const ProvinceTable = (props: IProps) => {
                 placeholder="input search text"
                 onSearch={
                     (value) => {
-                        fetchCategory(null, null, value)
+                        fetchDistrict(province.id, null, null, value)
                     }
                 }
                 enterButton
@@ -176,9 +244,9 @@ const ProvinceTable = (props: IProps) => {
             <Table
                 loading={loading}
                 bordered
-                dataSource={category}
+                dataSource={district}
                 columns={columns}
-                key={category.id}
+                key={district}
                 pagination={{
                     current: meta.currentPage,
                     pageSize: meta.itemsPerPage,
@@ -190,23 +258,25 @@ const ProvinceTable = (props: IProps) => {
                 showSorterTooltip={{ target: 'sorter-icon' }}
             />
             <Modal title={"Create " + categoryName} open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <CreateCategory
+                <CreateAddress
+                    provinceId={province.id}
                     categoryName={categoryName}
                     isModalOpen={isModalOpen}
                     closeModal={handleCancel}
-                    refreshCategory={fetchCategory}
+                    refreshCategory={fetchDistrict}
                 />
             </Modal>
             <Modal title={"Edit " + categoryName} open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null}>
-                <EditCategory
+                <EditAddress
+                    provinceId={province.id}
                     categoryName={categoryName}
                     isModalOpen={isModalOpenEdit}
                     closeModal={handleCancelEdit}
-                    refreshCategory={fetchCategory}
+                    refreshCategory={fetchDistrict}
                     categoryDetail={categoryDetail} />
             </Modal>
         </>
     )
 }
 
-export default ProvinceTable;
+export default WardTable;

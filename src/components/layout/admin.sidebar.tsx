@@ -85,6 +85,11 @@ const AdminSideBar = () => {
                     ],
                 },
                 {
+                    key: "employee",
+                    label: <Link href={"/dashboard/employee"}>Manage Employee</Link>,
+                    icon: <TeamOutlined />,
+                },
+                {
                     type: 'divider',
                 },
                 {

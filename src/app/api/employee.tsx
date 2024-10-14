@@ -33,3 +33,36 @@ export const getProfile = async (userId: string) => {
         console.log('Error fetching data:', error);
     }
 }
+
+export const createEmployee = async (user: FormData) => {
+    console.log("User->", user)
+    const session = await Access_token();
+    console.log("token->", session)
+    try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users/employee`, user, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+        });
+        console.log('create employee->', response.data)
+        return response.data
+    } catch (error) {
+        const code = (error as any).response.data
+        if (code.statusCode === 400) return code;
+        console.log('Error fetching data:', error);
+    }
+};
+
+export const active = async (userId: string) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/active/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+        })
+        return response.data;
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+}

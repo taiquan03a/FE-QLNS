@@ -65,3 +65,31 @@ export const editUser = async (userId: string, user: FormData) => {
         console.log('Error fetching data:', error);
     }
 };
+
+export const confirmToken = async (token: string) => {
+    const session = await Access_token();
+    console.log('token->', token);
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auths/confirm`, {
+            params: {
+                token: token
+            },
+        });
+        console.log(' confirm user->', response.data)
+        return response.data
+    } catch (error) {
+        const code = (error as any).response.data
+        if (code.statusCode === 400 || code.statusCode === 403 || code.statusCode === 404) return code;
+        console.log('Error fetching data:', error);
+    }
+};
+
+export const resetPassword = async (confirm: ResetPassword) => {
+    try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auths/resetPassword`, confirm);
+        console.log('reset password->', response.data);
+        return response.data;
+    } catch (e) {
+        console.log(e);
+    }
+};

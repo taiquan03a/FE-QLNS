@@ -26,7 +26,7 @@ const WardTable = (props: IProps) => {
     const { Search } = Input;
     const [searchParam, setSearchParam] = useState(null)
     const [province, setProvince] = useState(props.province);
-    const [district, setDistrict] = useState<any>();
+    const [ward, setWard] = useState<any>();
     const [categoryDetail, setCategoryDetail] = useState<any>();
     const [categoryName, setCategoryName] = useState('ward');
     const [meta, setMeta] = useState({
@@ -126,7 +126,7 @@ const WardTable = (props: IProps) => {
         try {
             const response = await getWardsByDistrict(provinceId, currentPage, itemsPerPage, searchParam);
             console.log('response->', response.data);
-            setDistrict(response.data);
+            setWard(response.data);
             setMeta({
                 currentPage: response.meta.currentPage,
                 itemsPerPage: response.meta.itemsPerPage,
@@ -244,9 +244,9 @@ const WardTable = (props: IProps) => {
             <Table
                 loading={loading}
                 bordered
-                dataSource={district}
+                dataSource={ward}
                 columns={columns}
-                key={district}
+                key={ward}
                 pagination={{
                     current: meta.currentPage,
                     pageSize: meta.itemsPerPage,

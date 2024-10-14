@@ -38,7 +38,7 @@ const CreateCategory = ({ categoryName, isModalOpen, closeModal, refreshCategory
             if (response.statusCode === 201) {
                 message.success(categoryName + ' created successfully!');
                 form.resetFields();
-                closeModal();  // Ẩn modal khi thêm thành công
+                closeModal();
                 refreshCategory(1, 5, null);
             }
         } catch (error) {

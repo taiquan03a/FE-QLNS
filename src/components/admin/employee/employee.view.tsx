@@ -53,7 +53,9 @@ const EmployeeView = (props: IProps) => {
                     ) : selectedKey == '2' ? (
                         <EducationView />
                     ) : selectedKey == '3' ? (
-                        <FamilyView />
+                        <FamilyView
+                            userId={props.userId}
+                        />
                     ) : selectedKey == '4' ? (
                         <ExperiencesView />
                     ) : <ProfileView userId={props.userId} />}

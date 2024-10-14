@@ -1,16 +1,20 @@
 'use client'
 import { User } from "@/types/user.type";
 import Access_token from "@/utils/session";
-import { Button, Image, Modal, Pagination, Table, TableColumnsType } from "antd"
+import { Button, Image, Modal, notification, Pagination, Table, TableColumnsType } from "antd"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Input } from 'antd';
-import { CheckCircleOutlined, DeleteOutlined, EditOutlined, InfoCircleOutlined, StopOutlined } from "@ant-design/icons";
+import Icon, { CheckCircleOutlined, DeleteOutlined, EditOutlined, InfoCircleOutlined, IssuesCloseOutlined, StopOutlined } from "@ant-design/icons";
 import { activeUser } from "@/app/api/role";
 import { CldImage } from "next-cloudinary";
 import { userDetail } from "@/app/api/user";
-import { getUser } from "@/app/api/employee";
+import { active, getUser } from "@/app/api/employee";
 import { useRouter } from "next/navigation";
+import CreateUser from "../user/user.create";
+import EditUser from "../user/user.edit";
+import CreateEmployee from "./employee.create";
+import EditEmployee from "./employee.edit";
 
 
 
@@ -107,10 +111,16 @@ export default function EmployeeTable(props: IProps) {
                             style={{ color: 'green', padding: '10px', fontSize: '16px' }}
                             onClick={() => handleActive(record)}
                         />
-                    ) : (
+                    ) : record.status == 0 ? (
                         <StopOutlined
                             style={{ color: 'red', padding: '10px', fontSize: '16px' }}
                             onClick={() => handleActive(record)}
+                        />
+                    ) : (
+
+                        <IssuesCloseOutlined
+                            style={{ color: 'red', padding: '10px', fontSize: '16px' }}
+                            onClick={() => handleMessage(record)}
                         />
                     )}
                 </div>,
@@ -132,12 +142,28 @@ export default function EmployeeTable(props: IProps) {
                 </div>,
         },
     ];
+    const handleMessage = (record: any) => {
+        notification.error({
+            message: "Tài khoản chưa được xác thực email.",
+            description: record.email,
+            duration: 1
+        })
+    }
     const handleDetail = async (category: any) => {
         router.push(`employee/${category.id}`)
     };
     const handleActive = async (record: any) => {
         console.log("record->", record);
-        // const response = await test(record.id);
+        setLoading(true);
+        try {
+            const response = await active(record.id);
+            console.log("res actice ->", response);
+            if (response.statusCode == 200) fetchUsers(meta.currentPage, meta.itemsPerPage, searchParam);
+        } catch (error) {
+            console.log('Error fetching data:', error);
+        }
+        setLoading(false);
+
         // console.log("response->", response)
     }
     const handleEdit = async (user: any) => {
@@ -164,7 +190,7 @@ export default function EmployeeTable(props: IProps) {
         setLoading(false)
     };
     useEffect(() => {
-        fetchUsers(meta.currentPage, meta.itemsPerPage, searchParam); // Gọi API lần đầu khi component mount
+        fetchUsers(meta.currentPage, meta.itemsPerPage, searchParam);
     }, []);
     const handleTableChange = (pagination: any) => {
         fetchUsers(pagination.current, pagination.pageSize, null);
@@ -212,12 +238,21 @@ export default function EmployeeTable(props: IProps) {
                 onChange={handleTableChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
             />
-            {/* <Modal title="Create Modal" open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <CreateUser></CreateUser>
+            <Modal title="Create Modal" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <CreateEmployee
+                    isModalOpen={isModalOpen}
+                    closeModal={handleCancel}
+                    refresh={fetchUsers}
+                />
             </Modal>
             <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
-                <EditUser user={user}></EditUser>
-            </Modal> */}
+                <EditEmployee
+                    user={user}
+                    isModalOpen={isModalOpenEdit}
+                    closeModal={handleCancelEdit}
+                    refresh={fetchUsers}
+                />
+            </Modal>
         </>
     )
 }

@@ -11,6 +11,7 @@ import CreateUser from "./user.create";
 import { CldImage } from "next-cloudinary";
 import { userDetail } from "@/app/api/user";
 import EditUser from "./user.edit";
+import { active } from "@/app/api/employee";
 
 
 
@@ -129,8 +130,15 @@ export default function UserTable(props: IProps) {
     ];
     const handleActive = async (record: any) => {
         console.log("record->", record);
-        // const response = await test(record.id);
-        // console.log("response->", response)
+        setLoading(true);
+        try {
+            const response = await active(record.id);
+            console.log("res actice ->", response);
+            if (response.statusCode == 200) fetchUsers(meta.currentPage, meta.itemsPerPage, searchParam);
+        } catch (error) {
+            console.log('Error fetching data:', error);
+        }
+        setLoading(false);
     }
     const handleEdit = async (user: any) => {
         console.log('Role being edited:', user.avatar);

@@ -32,9 +32,6 @@ const EditUser = (user: any) => {
         return e?.fileList;
     };
 
-    useEffect(() => {
-        setLoading(true);
-    }, []);
 
     const handleSubmit = async (values: any) => {
         try {
@@ -75,6 +72,7 @@ const EditUser = (user: any) => {
                 dateOfBirth: dayjs(user.user.dateOfBirth),
                 phoneNumber: user.user.phoneNumber
             });
+            setUrlFile(user.user.avatar);
         }
     }, [user]);
     return (

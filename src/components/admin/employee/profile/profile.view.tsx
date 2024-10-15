@@ -1,11 +1,11 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { Button, Cascader, Checkbox, Col, ColorPicker, DatePicker, Form, Input, InputNumber, Radio, Rate, Row, Segmented, Select, SelectProps, Slider, Switch, TreeSelect, Upload } from "antd";
+import { Button, Cascader, Checkbox, Col, ColorPicker, DatePicker, Form, Input, InputNumber, message, Radio, Rate, Row, Segmented, Select, SelectProps, Slider, Switch, TreeSelect, Upload } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { PlusOutlined } from "@ant-design/icons";
 import { getProfile } from "@/app/api/employee";
 import dayjs from "dayjs";
-import { getDistrictsByProvince, getWardsByDistrict } from "@/app/api/address";
+import { getDistrictByWard, getDistrictsByProvince, getProvinceByDistrict, getWardsByDistrict } from "@/app/api/address";
 import { getCategoryList } from "@/app/api/category";
 import { createProfile } from "@/app/api/profile";
 import FormItem from "antd/es/form/FormItem";
@@ -41,18 +41,59 @@ const ProfileView = (props: IProps) => {
         try {
             const response = await getProfile(props.userId);
             setEmployee(response.data);
+            console.log("employee->", response.data);
+            const wardPermanent = await getDistrictByWard(response.data.permanent_address_ward_id);
+            const provincePermanent = await getProvinceByDistrict(wardPermanent.data.district.id);
+            const wardHometown = await getDistrictByWard(response.data.hometown_ward_id);
+            const provinceHometown = await getProvinceByDistrict(wardHometown.data.district.id);
+            const wardAddress = await getDistrictByWard(response.data.address_now_ward_id);
+            const provinceAddress = await getProvinceByDistrict(wardAddress.data.district.id);
             form.setFieldsValue({
-                name: response.data.first_name + " " + response.data.last_name,
-                sex: 1,
-                cccd: response.data.phone_number,
+                first_name: response.data.first_name,
+                last_name: response.data.last_name,
+                sex: response.data.sex,
+                cccd: response.data.cccd,
                 date: dayjs(response.data.date_of_birth),
-                permanent: response.data.permanent_address_detail,
-                hometown: response.data.hometown_detail,
-                address: response.data.address_now_detail,
+                permanentDetail: response.data.permanent_address_detail,
+                hometownDetail: response.data.hometown_detail,
+                addressDetail: response.data.address_now_detail,
                 phone: response.data.phone_number,
-                edu: response.data.education_level
+                edu: response.data.education_level,
+                ethnicity: response.data.ethnicity.id,
+                permanent: {
+                    province: provincePermanent.data.id,
+                    district: {
+                        value: wardPermanent.data.district.id,
+                        label: wardPermanent.data.district.name
+                    },
+                    ward: {
+                        value: wardPermanent.data.id,
+                        label: wardPermanent.data.name
+                    }
+                },
+                hometown: {
+                    province: provinceHometown.data.id,
+                    district: {
+                        value: wardHometown.data.district.id,
+                        label: wardHometown.data.district.name
+                    },
+                    ward: {
+                        value: wardHometown.data.id,
+                        label: wardHometown.data.name
+                    }
+                },
+                address: {
+                    province: provinceAddress.data.id,
+                    district: {
+                        value: wardAddress.data.district.id,
+                        label: wardAddress.data.district.name
+                    },
+                    ward: {
+                        value: wardAddress.data.id,
+                        label: wardAddress.data.name
+                    }
+                }
             });
-            console.log("response->", response);
         } catch (error) {
             console.log('Error fetching data:', error);
         }
@@ -173,8 +214,12 @@ const ProfileView = (props: IProps) => {
         console.log('profile->', profile);
         try {
             const response = await createProfile(profile);
-            console.log("create profile->", response.data);
+            console.log("create profile->", response);
+            if (response.statusCode == 201) {
+                message.success("Cập nhật thông tin thành công.");
+            }
         } catch (e) {
+            message.error("Cập nhật thông tin thất bại.");
             console.error(e);
         }
 
@@ -187,11 +232,11 @@ const ProfileView = (props: IProps) => {
                 marginBottom: 20
             }}>
                 <span>Manager Profile</span>
-                {employee ? (
+                {/* {employee ? (
                     <Button onClick={handlCreate}>Edit Profile</Button>
                 ) : (
                     <Button>Create Profile</Button>
-                )}
+                )} */}
             </div>
             <Form
                 form={form}
@@ -209,8 +254,8 @@ const ProfileView = (props: IProps) => {
                 </Form.Item>
                 <Form.Item label="Giới tính:" name='sex'>
                     <Radio.Group>
-                        <Radio value="1"> Nam </Radio>
-                        <Radio value="0"> Nữ </Radio>
+                        <Radio value={1}> Nam </Radio>
+                        <Radio value={0}> Nữ </Radio>
                     </Radio.Group>
                 </Form.Item>
                 <Form.Item label="CCCD" name='cccd'>
@@ -221,45 +266,51 @@ const ProfileView = (props: IProps) => {
                 </Form.Item>
                 <Form.Item label="Nơi sinh" name='permanent'>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select Province"
-                            onChange={handleChangeProvince}
-                            options={optionsProvincePermanent}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select District"
-                            onChange={handleChangeDistrict}
-                            options={optionsDistrictPermanent}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select Ward"
-                            onChange={handleChangeWardPermanent}
-                            options={optionsWardPermanent}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
+                        <Form.Item name={['permanent', 'province']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select Province"
+                                onChange={handleChangeProvince}
+                                options={optionsProvincePermanent}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item name={['permanent', 'district']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select District"
+                                onChange={handleChangeDistrict}
+                                options={optionsDistrictPermanent}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item name={['permanent', 'ward']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select Ward"
+                                onChange={handleChangeWardPermanent}
+                                options={optionsWardPermanent}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
                     </div>
 
                 </Form.Item>
@@ -268,45 +319,51 @@ const ProfileView = (props: IProps) => {
                 </Form.Item>
                 <Form.Item label="Quên quán" name='hometown'>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select Province"
-                            onChange={handleChangeProvinceHometown}
-                            options={optionsProvinceHometown}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select District"
-                            onChange={handleChangeDistrictHometown}
-                            options={optionsDistrictHometown}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select Ward"
-                            onChange={handleChangeWardHometown}
-                            options={optionsWardHometown}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
+                        <Form.Item name={['hometown', 'province']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select Province"
+                                onChange={handleChangeProvinceHometown}
+                                options={optionsProvinceHometown}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item name={['hometown', 'district']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select District"
+                                onChange={handleChangeDistrictHometown}
+                                options={optionsDistrictHometown}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item name={['hometown', 'ward']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select Ward"
+                                onChange={handleChangeWardHometown}
+                                options={optionsWardHometown}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
                     </div>
                 </Form.Item>
                 <Form.Item label="Quê quán chi tiết" name="hometownDetail">
@@ -314,45 +371,51 @@ const ProfileView = (props: IProps) => {
                 </Form.Item>
                 <Form.Item label="Nơi ở hiện nay" name='address'>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select Province"
-                            onChange={handleChangeProvinceAddress}
-                            options={optionsProvinceAddress}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select District"
-                            onChange={handleChangeDistrictAddress}
-                            options={optionsDistrictAddress}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Select Ward"
-                            onChange={handleChangeWardAddress}
-                            options={optionsWardAddress}
-                            filterOption={(inputValue, option) => {
-                                if (!option) return false;
-                                const label = option.label?.toString().toLowerCase() || '';
-                                return label.includes(inputValue.toLowerCase());
-                            }
-                            }
-                        />
+                        <Form.Item name={['address', 'province']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select Province"
+                                onChange={handleChangeProvinceAddress}
+                                options={optionsProvinceAddress}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item name={['address', 'district']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select District"
+                                onChange={handleChangeDistrictAddress}
+                                options={optionsDistrictAddress}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item name={['address', 'ward']} noStyle>
+                            <Select
+                                showSearch
+                                style={{ flex: 1 }}
+                                placeholder="Select Ward"
+                                onChange={handleChangeWardAddress}
+                                options={optionsWardAddress}
+                                filterOption={(inputValue, option) => {
+                                    if (!option) return false;
+                                    const label = option.label?.toString().toLowerCase() || '';
+                                    return label.includes(inputValue.toLowerCase());
+                                }
+                                }
+                            />
+                        </Form.Item>
                     </div>
                 </Form.Item>
                 <FormItem label="Chỗ ở chi tiết" name="addressDetail">

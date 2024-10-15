@@ -44,20 +44,24 @@ const EmployeeView = (props: IProps) => {
                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                     borderRadius: '10px',
                     backgroundColor: 'white',
-                    width: 800
+                    width: 1000
                 }}>
                     {selectedKey == '1' ? (
                         <ProfileView
                             userId={props.userId}
                         />
                     ) : selectedKey == '2' ? (
-                        <EducationView />
+                        <EducationView
+                            userId={props.userId}
+                        />
                     ) : selectedKey == '3' ? (
                         <FamilyView
                             userId={props.userId}
                         />
                     ) : selectedKey == '4' ? (
-                        <ExperiencesView />
+                        <ExperiencesView
+                            userId={props.userId}
+                        />
                     ) : <ProfileView userId={props.userId} />}
 
                 </div>

@@ -1,7 +1,7 @@
 'use client'
 import { User } from "@/types/user.type";
 import Access_token from "@/utils/session";
-import { Button, Image, Modal, notification, Pagination, Table, TableColumnsType } from "antd"
+import { Button, Image, message, Modal, notification, Pagination, Table, TableColumnsType } from "antd"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Input } from 'antd';
@@ -158,8 +158,12 @@ export default function EmployeeTable(props: IProps) {
         try {
             const response = await active(record.id);
             console.log("res actice ->", response);
-            if (response.statusCode == 200) fetchUsers(meta.currentPage, meta.itemsPerPage, searchParam);
+            if (response.statusCode == 200) {
+                message.success('Thay đổi trang thái thành công.');
+                fetchUsers(meta.currentPage, meta.itemsPerPage, searchParam);
+            }
         } catch (error) {
+            message.error('Thay đổi trang thái thất bại.');
             console.log('Error fetching data:', error);
         }
         setLoading(false);

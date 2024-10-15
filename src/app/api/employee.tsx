@@ -66,3 +66,23 @@ export const active = async (userId: string) => {
         console.log('Error fetching data:', error);
     }
 }
+
+export const getListEducation = async (userId: string, currentPage: any, itemsPerPage: any, searchParam: any) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/education/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+            params: {
+                page: currentPage,
+                limit: itemsPerPage,
+                search: searchParam,
+                searchBy: ['id']
+            },
+        });
+        return response.data.data
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+};

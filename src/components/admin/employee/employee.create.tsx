@@ -38,7 +38,7 @@ const CreateEmployee = ({ isModalOpen, closeModal, refresh }: UserModalProps) =>
             const formData = new FormData();
             formData.append("avatar", selectedFile || '');
             formData.append('email', email);
-            formData.append('password', password);
+            //formData.append('password', password);
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
             formData.append('dateOfBirth', dateOfBirth);
@@ -47,7 +47,7 @@ const CreateEmployee = ({ isModalOpen, closeModal, refresh }: UserModalProps) =>
             const user: User = {
                 avatar: selectedFile,
                 email: email,
-                password: password,
+                //password: password,
                 firstName: firstName,
                 lastName: lastName,
                 dateOfBirth: dateOfBirth,
@@ -86,13 +86,13 @@ const CreateEmployee = ({ isModalOpen, closeModal, refresh }: UserModalProps) =>
                 >
                     <Input placeholder='input email' />
                 </Form.Item>
-                <Form.Item
+                {/* <Form.Item
                     label="Password"
                     name='password'
                     rules={[{ required: true, message: 'Please input the password!' }]}
                 >
                     <Input type="password" placeholder="input password" />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item
                     label="First name"
@@ -110,7 +110,7 @@ const CreateEmployee = ({ isModalOpen, closeModal, refresh }: UserModalProps) =>
                     <Input placeholder='input email' />
                 </Form.Item>
                 <Form.Item
-                    label="DatePicker"
+                    label="Date Of Birth"
                     name='dateOfBirth'
                     rules={[{ required: true, message: 'Please input the email!' }]}
                 >

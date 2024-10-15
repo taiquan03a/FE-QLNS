@@ -104,3 +104,32 @@ export const getWardsByDistrict = async (districtId: number, currentPage: any, i
     }
 };
 
+export const getDistrictByWard = async (wardId: number) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/address/district/getByWard/${wardId}`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+        });
+        console.log("data->", response.data)
+        return response.data
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+};
+
+export const getProvinceByDistrict = async (districtId: number) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/category/province/getByDistrict/${districtId}`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+        });
+        console.log("data->", response.data)
+        return response.data
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+};

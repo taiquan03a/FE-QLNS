@@ -1,12 +1,47 @@
+import { getListFamily } from "@/app/api/family";
 import { CheckCircleOutlined, EditOutlined, InfoCircleOutlined, StopOutlined } from "@ant-design/icons";
-import { Table, TableColumnsType } from "antd";
+import { Button, Input, Modal, Table, TableColumnsType } from "antd";
 import Search from "antd/es/input/Search";
+import { useEffect, useState } from "react";
+import CreateFamily from "./family.create";
+import { getDistrictByWard, getProvinceByDistrict } from "@/app/api/address";
 
 interface IProps {
     userId: string;
 }
 
 const FamilyView = (props: IProps) => {
+    const { Search } = Input;
+    const [searchParam, setSearchParam] = useState(null)
+    const [family, setFamily] = useState([]);
+    const [familyDetail, setfamilyDetail] = useState<any>();
+    const [meta, setMeta] = useState({
+        currentPage: 1,
+        itemsPerPage: 5,
+        totalItems: 10,
+    });
+    const [loading, setLoading] = useState(false);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+    const showModalEdit = () => {
+        setIsModalOpenEdit(true);
+    };
+    const handleCancelEdit = () => {
+
+        setIsModalOpenEdit(false);
+    };
+    const fetchAddress = async (ward_id: number) => {
+        const wardPermanent = await getDistrictByWard(ward_id);
+        const provincePermanent = await getProvinceByDistrict(wardPermanent.data.district.id);
+        return wardPermanent.data.name + " " + wardPermanent.data.district.name + " " + provincePermanent.data.name;
+    }
     const columns: TableColumnsType<any> = [
         {
             title: 'ID',
@@ -15,36 +50,28 @@ const FamilyView = (props: IProps) => {
         },
         {
             title: 'Quan hệ',
-            dataIndex: 'avatar',
+            dataIndex: ['relationship', 'name'],
             key: 'avatar',
-            render: (text, record) =>
-                <div>
-                    <img
-                        style={{ width: '50px', height: '50px' }}
-                        src={record.avatar}
-                        alt="avatar"
-                    />
-                </div>,
         },
         {
             title: 'Họ tên',
-            dataIndex: 'code',
-            key: 'code',
+            dataIndex: 'full_name',
+            key: 'full_name',
         },
         {
             title: 'Năm sinh',
-            dataIndex: 'email',
-            key: 'email',
+            dataIndex: 'year_of_birth',
+            key: 'year_of_birth',
         },
         {
             title: 'Nghề nghiệp',
-            dataIndex: 'firstName',
-            key: 'firstName',
+            dataIndex: 'job',
+            key: 'job',
         },
         {
             title: 'Địa chỉ',
-            dataIndex: 'lastName',
-            key: 'lastName',
+            key: 'address_detail',
+            render: async (text, record) => `${record.address_detail} ${await fetchAddress(record.ward_id)}`,
         },
         {
             title: 'Action',
@@ -63,6 +90,33 @@ const FamilyView = (props: IProps) => {
                 </div>,
         },
     ];
+    const handleEdit = async (record: any) => {
+        console.log("recor->", record);
+        setfamilyDetail(record);
+        showModalEdit();
+    }
+    const fetchFamily = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
+        setLoading(true);
+        try {
+            const response = await getListFamily(props.userId, currentPage, itemsPerPage, searchParam);
+            setFamily(response.data);
+            console.log("family list->", response.data);
+            setMeta({
+                currentPage: response.meta.currentPage,
+                itemsPerPage: response.meta.itemsPerPage,
+                totalItems: response.meta.totalItems,
+            });
+        } catch (error) {
+            console.log('Error fetching data:', error);
+        }
+        setLoading(false)
+    };
+    useEffect(() => {
+        fetchFamily(meta.currentPage, meta.itemsPerPage, searchParam);
+    }, []);
+    const handleTableChange = (pagination: any) => {
+        fetchFamily(pagination.current, pagination.pageSize, null);
+    };
     return (
         <>
             <div style={{
@@ -71,7 +125,7 @@ const FamilyView = (props: IProps) => {
                 marginBottom: 20
             }}>
                 <span>Manager User</span>
-                {/* <Button onClick={showModal}>Create User</Button> */}
+                <Button onClick={showModal}>Create Family</Button>
 
             </div>
             <Search
@@ -84,31 +138,35 @@ const FamilyView = (props: IProps) => {
                 placeholder="input search text"
                 onSearch={
                     (value) => {
-                        //fetchUsers(null, null, value)
+                        fetchFamily(null, null, value)
                     }
                 }
                 enterButton
             />
             <Table
-                //loading={loading}
+                loading={loading}
                 bordered
-                //dataSource={users}
-                //key={users.id}
+                dataSource={family}
                 columns={columns}
-                // pagination={{
-                //     current: meta.currentPage,
-                //     pageSize: meta.itemsPerPage,
-                //     showSizeChanger: true,
-                //     total: meta.totalItems,
-                //     pageSizeOptions: ['5', '10', '15', '20'],
-                // }}
-                // onChange={handleTableChange}
+                pagination={{
+                    current: meta.currentPage,
+                    pageSize: meta.itemsPerPage,
+                    showSizeChanger: true,
+                    total: meta.totalItems,
+                    pageSizeOptions: ['5', '10', '15', '20'],
+                }}
+                onChange={handleTableChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
             />
-            {/* <Modal title="Create Modal" open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <CreateUser></CreateUser>
+            <Modal title="Create Modal" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <CreateFamily
+                    profileId={props.userId}
+                    isModalOpen={isModalOpen}
+                    closeModal={handleCancel}
+                    refresh={fetchFamily}
+                />
             </Modal>
-            <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
+            {/* <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
                 <EditUser user={user}></EditUser>
             </Modal> */}
         </>

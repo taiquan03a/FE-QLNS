@@ -4,6 +4,7 @@ import Search from "antd/es/input/Search";
 import CreateEducation from "./education.create";
 import { useEffect, useState } from "react";
 import { getListEducation } from "@/app/api/employee";
+import EditEducation from "./education.edit";
 
 interface IProps {
     userId: string;
@@ -13,7 +14,7 @@ const EducationView = (props: IProps) => {
     const { Search } = Input;
     const [searchParam, setSearchParam] = useState(null)
     const [education, setEducation] = useState([]);
-    const [categoryDetail, setCategoryDetail] = useState<any>();
+    const [educationDetail, setEducationDetail] = useState<any>();
     const [meta, setMeta] = useState({
         currentPage: 1,
         itemsPerPage: 5,
@@ -87,6 +88,8 @@ const EducationView = (props: IProps) => {
     ];
     const handleEdit = async (record: any) => {
         console.log("recor->", record);
+        setEducationDetail(record);
+        showModalEdit();
     }
     const fetchEducation = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
         setLoading(true);
@@ -160,9 +163,14 @@ const EducationView = (props: IProps) => {
                     refresh={fetchEducation}
                 />
             </Modal>
-            {/* <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
-                <EditUser user={user}></EditUser>
-            </Modal> */}
+            <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
+                <EditEducation
+                    education={educationDetail}
+                    isModalOpen={isModalOpenEdit}
+                    closeModal={handleCancelEdit}
+                    refresh={fetchEducation}
+                />
+            </Modal>
         </>
     )
 }

@@ -32,7 +32,7 @@ export const createAddress = async (categoryNew: AddressType, categoryName: stri
                 Authorization: `Bearer ${session}`,
             },
         });
-        console.log("data->", response.data);
+
         return response.data
     } catch (error) {
         console.log('Error fetching data:', error);
@@ -47,7 +47,7 @@ export const editAddress = async (categoryUpdate: AddressType, categoryId: numbe
                 Authorization: `Bearer ${session}`,
             },
         });
-        console.log("data->", response.data);
+
         return response.data
     } catch (error) {
         console.log('Error fetching data:', error);
@@ -62,7 +62,7 @@ export const provinceDetail = async (provinceId: string) => {
                 Authorization: `Bearer ${session}`,
             },
         });
-        console.log("data->", response.data)
+
         return response.data
     } catch (error) {
         console.log('Error fetching data:', error);
@@ -76,7 +76,6 @@ export const districtDetail = async (districtId: string) => {
                 Authorization: `Bearer ${session}`,
             },
         });
-        console.log("data->", response.data)
         return response.data
     } catch (error) {
         console.log('Error fetching data:', error);
@@ -97,7 +96,6 @@ export const getWardsByDistrict = async (districtId: number, currentPage: any, i
                 searchBy: ['code', 'name']
             },
         });
-        console.log("data->", response.data.data)
         return response.data.data
     } catch (error) {
         console.log('Error fetching data:', error);
@@ -112,7 +110,6 @@ export const getDistrictByWard = async (wardId: number) => {
                 Authorization: `Bearer ${session}`,
             },
         });
-        console.log("data->", response.data)
         return response.data
     } catch (error) {
         console.log('Error fetching data:', error);
@@ -127,7 +124,6 @@ export const getProvinceByDistrict = async (districtId: number) => {
                 Authorization: `Bearer ${session}`,
             },
         });
-        console.log("data->", response.data)
         return response.data
     } catch (error) {
         console.log('Error fetching data:', error);

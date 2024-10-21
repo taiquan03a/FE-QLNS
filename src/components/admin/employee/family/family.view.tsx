@@ -5,6 +5,7 @@ import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import CreateFamily from "./family.create";
 import { getDistrictByWard, getProvinceByDistrict } from "@/app/api/address";
+import EditFamily from "./family.edit";
 
 interface IProps {
     userId: string;
@@ -13,7 +14,7 @@ interface IProps {
 const FamilyView = (props: IProps) => {
     const { Search } = Input;
     const [searchParam, setSearchParam] = useState(null)
-    const [family, setFamily] = useState([]);
+    const [family, setFamily] = useState<any>();
     const [familyDetail, setfamilyDetail] = useState<any>();
     const [meta, setMeta] = useState({
         currentPage: 1,
@@ -40,7 +41,7 @@ const FamilyView = (props: IProps) => {
     const fetchAddress = async (ward_id: number) => {
         const wardPermanent = await getDistrictByWard(ward_id);
         const provincePermanent = await getProvinceByDistrict(wardPermanent.data.district.id);
-        return wardPermanent.data.name + " " + wardPermanent.data.district.name + " " + provincePermanent.data.name;
+        return wardPermanent.data.name + " - " + wardPermanent.data.district.name + " - " + provincePermanent.data.name;
     }
     const columns: TableColumnsType<any> = [
         {
@@ -70,8 +71,8 @@ const FamilyView = (props: IProps) => {
         },
         {
             title: 'Địa chỉ',
-            key: 'address_detail',
-            render: async (text, record) => `${record.address_detail} ${await fetchAddress(record.ward_id)}`,
+            key: 'fullAddress',
+            dataIndex: 'fullAddress'
         },
         {
             title: 'Action',
@@ -81,12 +82,12 @@ const FamilyView = (props: IProps) => {
                 <div>
                     <EditOutlined
                         style={{ color: 'blue', padding: '10px', fontSize: "16px" }}
-                    //onClick={() => handleEdit(record)}
+                        onClick={() => handleEdit(record)}
                     />
-                    <InfoCircleOutlined
+                    {/* <InfoCircleOutlined
                         style={{ color: "blue", padding: '10px', fontSize: "16px" }}
-                    //onClick={() => handleDetail(record)}
-                    />
+                    onClick={() => handleDetail(record)}
+                    /> */}
                 </div>,
         },
     ];
@@ -99,7 +100,17 @@ const FamilyView = (props: IProps) => {
         setLoading(true);
         try {
             const response = await getListFamily(props.userId, currentPage, itemsPerPage, searchParam);
-            setFamily(response.data);
+            const result = await Promise.all(
+                response.data.map(async (record: { ward_id: number; address_detail: any; }) => {
+                    const addressDetail = await fetchAddress(record.ward_id);
+                    return {
+                        ...record,
+                        fullAddress: `${record.address_detail} ${addressDetail}`,
+                    };
+                })
+            );
+            console.log("result->", result);
+            setFamily(result);
             console.log("family list->", response.data);
             setMeta({
                 currentPage: response.meta.currentPage,
@@ -166,9 +177,14 @@ const FamilyView = (props: IProps) => {
                     refresh={fetchFamily}
                 />
             </Modal>
-            {/* <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
-                <EditUser user={user}></EditUser>
-            </Modal> */}
+            <Modal title="Edit Modal" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null} >
+                <EditFamily
+                    family={familyDetail}
+                    isModalOpen={isModalOpenEdit}
+                    closeModal={handleCancelEdit}
+                    refresh={fetchFamily}
+                />
+            </Modal>
         </>
     )
 }

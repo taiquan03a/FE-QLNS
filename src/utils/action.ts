@@ -12,6 +12,7 @@ export async function authenticate(email: string, password: string): Promise<{
             password: password,
             redirect: false,
         })
+        console.log("r->", r);
         return r
     } catch (error) {
         if ((error as any).type === "InvaliEmailPassword") {

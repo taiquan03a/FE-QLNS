@@ -1,10 +1,10 @@
 import Access_token from "@/utils/session";
 import axios from "axios";
 
-export const getListFamily = async (userId: string, currentPage: any, itemsPerPage: any, searchParam: any) => {
+export const getListExperience = async (userId: string, currentPage: any, itemsPerPage: any, searchParam: any) => {
     const session = await Access_token();
     try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/families/${userId}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/experiences/${userId}`, {
             headers: {
                 Authorization: `Bearer ${session}`,
             },
@@ -21,10 +21,10 @@ export const getListFamily = async (userId: string, currentPage: any, itemsPerPa
     }
 };
 
-export const createFamily = async (family: Family) => {
+export const createExperience = async (experiences: Experiences) => {
     const session = await Access_token();
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/families`, family, {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/experiences`, experiences, {
             headers: {
                 Authorization: `Bearer ${session}`,
             },
@@ -36,10 +36,10 @@ export const createFamily = async (family: Family) => {
     }
 };
 
-export const editFamily = async (family: Family) => {
+export const editExperience = async (experiences: Experiences) => {
     const session = await Access_token();
     try {
-        const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/families`, family, {
+        const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/experiences`, experiences, {
             headers: {
                 Authorization: `Bearer ${session}`,
             },

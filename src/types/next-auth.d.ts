@@ -7,6 +7,7 @@ interface IUser {
     email: string;
     isVerify: boolean,
     access_token: string,
+    user_type: string,
     type: string;
     role: string;
 }

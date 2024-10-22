@@ -2,16 +2,24 @@
 import { AdminContext } from '@/library/admin.context';
 import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
 import { signOut, useSession } from 'next-auth/react';
+import userType from '@/utils/userType';
 
 const AdminHeader = () => {
     const { Header } = Layout;
     const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
-
+    const [type, setType] = useState<string>();
+    useEffect(() => {
+        user_type();
+    }, []);
+    const user_type = async () => {
+        const type = await userType();
+        setType(type);
+    }
     const items: MenuProps['items'] = [
         {
             key: '1',
@@ -54,7 +62,7 @@ const AdminHeader = () => {
                         style={{ color: "unset", lineHeight: "0 !important", marginRight: 20 }}
                     >
                         <Space>
-                            Welcome Admin
+                            Welcome {type}
                             <DownOutlined />
                         </Space>
                     </a>

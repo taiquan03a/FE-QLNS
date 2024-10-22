@@ -31,6 +31,7 @@ declare global {
     }
     interface ILogin {
         access_token: string;
+        user_type: string;
     }
 
 }

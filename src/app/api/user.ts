@@ -93,3 +93,77 @@ export const resetPassword = async (confirm: ResetPassword) => {
         console.log(e);
     }
 };
+
+export const getProfileByUser = async () => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/profile/user/getByUser`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+        })
+        console.log("profile->", response.data);
+        return response.data;
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+}
+
+export const getListEducationByUser = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/education/user/getByUser`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+            params: {
+                page: currentPage,
+                limit: itemsPerPage,
+                search: searchParam,
+                searchBy: ['id']
+            },
+        });
+        return response.data.data
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+};
+export const getListFamilyByUser = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/families/user/getByUser`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+            params: {
+                page: currentPage,
+                limit: itemsPerPage,
+                search: searchParam,
+                searchBy: ['id']
+            },
+        });
+        return response.data.data
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+};
+
+export const getListExperienceGetByUser = async (currentPage: any, itemsPerPage: any, searchParam: any) => {
+    const session = await Access_token();
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/experiences/user/getByUser`, {
+            headers: {
+                Authorization: `Bearer ${session}`,
+            },
+            params: {
+                page: currentPage,
+                limit: itemsPerPage,
+                search: searchParam,
+                searchBy: ['id']
+            },
+        });
+        return response.data.data
+    } catch (error) {
+        console.log('Error fetching data:', error);
+    }
+};

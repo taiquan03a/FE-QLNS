@@ -5,8 +5,12 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
 const LoginPage = async () => {
+    const session = await auth();
+    console.log("user->", session?.user);
     return (
-        <Login />
+        <Login
+
+        />
     )
 }
 

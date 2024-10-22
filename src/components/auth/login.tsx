@@ -6,6 +6,9 @@ import { signIn, useSession } from 'next-auth/react';
 import { authenticate } from '@/utils/action';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { auth } from '@/auth';
+import { IUser } from '@/types/next-auth';
+import userType from '@/utils/userType';
 
 export default function Login() {
     const router = useRouter();
@@ -32,12 +35,19 @@ export default function Login() {
             })
 
         } else {
+            const type = await userType();
             notification.success({
                 message: "Success login",
                 description: "Đăng nhập thành công.",
                 duration: 1
             })
-            router.push('/dashboard');
+            if (type == "QUANTRI") {
+                router.push('/dashboard');
+            }
+            else if (type == "NHANVIEN") {
+                router.push('/user/home');
+            }
+
         }
     };
     return (

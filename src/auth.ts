@@ -31,7 +31,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
                 if (res.statusCode == 201) {
                     return {
-                        access_token: res.data?.access_token
+                        access_token: res.data?.access_token,
+                        user_type: res.data?.user_type
                     }
                 }
             },
